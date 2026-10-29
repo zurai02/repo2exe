@@ -1,0 +1,1034 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Repo2EXE</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+/* Layout: centered single-column with full-bleed dark header */
+:root {
+  --bg: #f8f8f6;
+  --bg2: #eeecea;
+  --fg: #1a1a18;
+  --fg2: #5a5a56;
+  --border: #d6d4d0;
+  --accent: #2e6fff;
+  --accent-dim: #d6e4ff;
+  --code-bg: #1e1e1a;
+  --code-fg: #e8e4d8;
+  --success: #1a8f4c;
+  --success-bg: #d4f0e3;
+  --card: #ffffff;
+  --shadow: 0 2px 8px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141412;
+    --bg2: #1e1e1a;
+    --fg: #e8e4d8;
+    --fg2: #8a8a82;
+    --border: #2e2e2a;
+    --accent: #5588ff;
+    --accent-dim: #1a2a4a;
+    --code-bg: #0e0e0c;
+    --code-fg: #e8e4d8;
+    --success: #3ec878;
+    --success-bg: #0a2a1a;
+    --card: #1e1e1a;
+    --shadow: 0 2px 8px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141412;
+  --bg2: #1e1e1a;
+  --fg: #e8e4d8;
+  --fg2: #8a8a82;
+  --border: #2e2e2a;
+  --accent: #5588ff;
+  --accent-dim: #1a2a4a;
+  --code-bg: #0e0e0c;
+  --code-fg: #e8e4d8;
+  --success: #3ec878;
+  --success-bg: #0a2a1a;
+  --card: #1e1e1a;
+  --shadow: 0 2px 8px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--code-bg);
+  margin-left: max(-16px, calc(-1 * env(safe-area-inset-left, 0px)));
+  margin-right: max(-16px, calc(-1 * env(safe-area-inset-right, 0px)));
+  padding: 48px max(32px, env(safe-area-inset-left, 0px));
+  padding-right: max(32px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid #2a2a26;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 100% at 80% 50%, rgba(46,111,255,.12), transparent);
+  pointer-events: none;
+}
+
+.header-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-icon svg { display: block; }
+
+.logo-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 20px;
+  color: #e8e4d8;
+  letter-spacing: -0.02em;
+}
+
+.logo-text span { color: var(--accent); }
+
+h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(24px, 5vw, 38px);
+  font-weight: 700;
+  color: #e8e4d8;
+  margin: 0 0 10px;
+  line-height: 1.15;
+  text-wrap: balance;
+  letter-spacing: -0.025em;
+}
+
+.tagline {
+  color: #7a7a72;
+  font-size: 15px;
+  margin: 0;
+}
+
+/* ── Main ── */
+.main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-block: 40px;
+}
+
+/* ── Step sections ── */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.step-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+/* ── Form card ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+}
+
+.field + .field { margin-top: 16px; }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg2);
+  margin-bottom: 6px;
+  letter-spacing: .01em;
+}
+
+input[type="text"], input[type="url"], select, textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--fg);
+  outline: none;
+  transition: border-color .15s;
+  appearance: none;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+.row { display: flex; gap: 12px; }
+.row .field { flex: 1; min-width: 0; }
+
+.hint {
+  font-size: 12px;
+  color: var(--fg2);
+  margin-top: 5px;
+}
+
+/* ── Options grid ── */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.option-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg2);
+  text-align: left;
+  transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option-btn:hover { border-color: var(--accent); color: var(--fg); }
+.option-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.option-btn small {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--fg2);
+  display: block;
+}
+.option-btn.active small { color: var(--accent); opacity: .8; }
+
+/* ── Generate button ── */
+.generate-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  letter-spacing: .02em;
+}
+
+.generate-btn:hover { opacity: .9; }
+.generate-btn:active { transform: scale(.99); }
+
+/* ── Output ── */
+.output-section { display: none; }
+.output-section.visible { display: block; }
+
+.output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.output-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.copy-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.code-block {
+  background: var(--code-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #2a2a26;
+}
+
+.code-bar {
+  background: #252521;
+  padding: 8px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #6a6a62;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #1a1a16;
+}
+
+.code-bar .dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #3a3a36;
+}
+
+.code-bar .path {
+  color: #8a8a7a;
+  flex: 1;
+}
+
+pre {
+  margin: 0;
+  padding: 20px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--code-fg);
+}
+
+/* Syntax highlight colors */
+.y-key { color: #7ab8ff; }
+.y-val { color: #b8d4a0; }
+.y-str { color: #ffb870; }
+.y-comment { color: #5a5a52; font-style: italic; }
+.y-num { color: #a8d8a0; }
+
+/* ── Instructions card ── */
+.instructions {
+  margin-top: 24px;
+}
+
+.inst-steps {
+  counter-reset: steps;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.inst-step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.inst-step:last-child { border-bottom: none; }
+
+.inst-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.inst-content { min-width: 0; }
+
+.inst-content strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 2px;
+}
+
+.inst-content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fg2);
+}
+
+.inst-content code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--fg);
+}
+
+/* ── Badge ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+/* ── Notice ── */
+.notice {
+  background: var(--accent-dim);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--fg);
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.notice-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+
+/* ── Footer ── */
+.footer {
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+  padding-block: 24px;
+  font-size: 12.5px;
+  color: var(--fg2);
+  text-align: center;
+}
+
+.footer a { color: var(--accent); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .row { flex-direction: column; }
+  h1 { font-size: 26px; }
+  .header { padding: 32px max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
+</style>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 14l4-8 3 6 2-3 3 5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="logo-text">Repo<span>2</span>EXE</span>
+    </div>
+    <h1>GitHub Repo → Windows EXE</h1>
+    <p class="tagline">Generate a GitHub Actions workflow that builds a self-contained .exe from any repo — no server needed.</p>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- Step 1: Configure -->
+  <div style="margin-bottom: 32px;">
+    <div class="step-header">
+      <span class="step-num">STEP 01</span>
+      <h2>Configure your build</h2>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label for="repo-url">Repository URL</label>
+        <input type="url" id="repo-url" placeholder="https://github.com/username/my-project" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="branch">Branch</label>
+          <input type="text" id="branch" value="main" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="trigger">Build trigger</label>
+          <select id="trigger">
+            <option value="push">On every push</option>
+            <option value="release">On release tag</option>
+            <option value="manual" selected>Manual (workflow_dispatch)</option>
+            <option value="both">Push + manual</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top: 20px;">
+        <label>Build tool</label>
+        <div class="options-grid" id="tool-grid">
+          <button class="option-btn active" data-tool="pyinstaller">PyInstaller<small>Python → .exe</small></button>
+          <button class="option-btn" data-tool="nuitka">Nuitka<small>Python (optimized)</small></button>
+          <button class="option-btn" data-tool="pkg">pkg<small>Node.js → .exe</small></button>
+          <button class="option-btn" data-tool="nexe">nexe<small>Node.js (smaller)</small></button>
+          <button class="option-btn" data-tool="go">go build<small>Go → .exe</small></button>
+          <button class="option-btn" data-tool="dotnet">dotnet publish<small>.NET → .exe</small></button>
+        </div>
+      </div>
+
+      <!-- Tool-specific options -->
+      <div id="tool-opts" style="margin-top: 16px;"></div>
+
+      <div class="field">
+        <label for="out-name">Output name <span style="color:var(--fg2);font-weight:400;">(optional)</span></label>
+        <input type="text" id="out-name" placeholder="my-app  (defaults to repo name)" spellcheck="false">
+      </div>
+
+      <button class="generate-btn" id="gen-btn">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v4m0 0l-2-2m2 2l2-2M2 10h12M4 13h8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Generate Workflow YAML
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Output -->
+  <div class="output-section" id="output-section">
+    <div class="step-header">
+      <span class="step-num">STEP 02</span>
+      <h2>Add to your repo</h2>
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div style="padding: 16px 20px 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <h2 style="margin:0;font-size:15px;font-weight:600;">build-exe.yml</h2>
+          <span class="badge">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ready
+          </span>
+        </div>
+        <button class="copy-btn" id="copy-btn">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 9V2a1 1 0 011-1h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Copy YAML
+        </button>
+      </div>
+      <div class="code-block" style="margin:16px;border-radius:8px;">
+        <div class="code-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="path">.github/workflows/build-exe.yml</span>
+        </div>
+        <pre id="yaml-output"></pre>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="card instructions">
+      <div style="margin-bottom:16px;font-size:15px;font-weight:600;">How to use it</div>
+      <div class="inst-steps">
+        <div class="inst-step">
+          <div class="inst-num">1</div>
+          <div class="inst-content">
+            <strong>Create the folder</strong>
+            <p>In your repo, create <code>.github/workflows/</code> if it doesn't exist.</p>
+          </div>
+        </div>
+        <div class="inst-step">
+          <div class="inst-num">2</div>
+          <div class="inst-content">
+            <strong>Add the file</strong>
+            <p>Save the YAML above as <code>.github/workflows/build-exe.yml</code> and commit it.</p>
+          </div>
+        </div>
+        <div class="inst-step">
+          <div class="inst-num">3</div>
+          <div class="inst-content">
+            <strong>Run the workflow</strong>
+            <p id="trigger-inst">Go to <strong>Actions → Build EXE</strong> in your repo and click <strong>Run workflow</strong>.</p>
+          </div>
+        </div>
+        <div class="inst-step">
+          <div class="inst-num">4</div>
+          <div class="inst-content">
+            <strong>Download the .exe</strong>
+            <p>When the run finishes, open it and download the <strong>Artifacts</strong> ZIP — your .exe is inside.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice">
+      <span class="notice-icon">💡</span>
+      <span>GitHub Actions is free for public repos and included with 2,000 minutes/month on free private accounts. The built .exe runs on Windows only unless you add a matrix for Linux/macOS.</span>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Built for <a href="https://github.com/zurai02" target="_blank">zurai02</a> · Paste the YAML into any GitHub repo and ship.
+</footer>
+
+<script>
+// ── Tool options config ──
+const toolOpts = {
+  pyinstaller: `<div class="field"><label for="py-entry">Entry script</label><input type="text" id="py-entry" placeholder="main.py" value="main.py" spellcheck="false"><p class="hint">The Python file with your <code>if __name__ == "__main__"</code>.</p></div>
+  <div class="field"><label for="py-mode">Bundle mode</label><select id="py-mode"><option value="--onefile" selected>One-file EXE (recommended)</option><option value="--onedir">One-directory bundle</option></select></div>`,
+
+  nuitka: `<div class="field"><label for="nu-entry">Entry script</label><input type="text" id="nu-entry" placeholder="main.py" value="main.py" spellcheck="false"></div>
+  <div class="field"><label for="nu-extra">Extra nuitka flags <span style="font-weight:400;color:var(--fg2)">(optional)</span></label><input type="text" id="nu-extra" placeholder="--enable-plugin=qt-plugins" spellcheck="false"></div>`,
+
+  pkg: `<div class="field"><label for="pkg-entry">Entry file</label><input type="text" id="pkg-entry" placeholder="index.js" value="index.js" spellcheck="false"></div>
+  <div class="field"><label for="pkg-node">Node target</label><select id="pkg-node"><option>node18</option><option selected>node20</option><option>node22</option></select></div>`,
+
+  nexe: `<div class="field"><label for="nex-entry">Entry file</label><input type="text" id="nex-entry" placeholder="index.js" value="index.js" spellcheck="false"></div>
+  <div class="field"><label for="nex-node">Node version</label><input type="text" id="nex-node" value="20.11.0" spellcheck="false"></div>`,
+
+  go: `<div class="field"><label for="go-pkg">Package to build</label><input type="text" id="go-pkg" placeholder="./cmd/myapp" value="." spellcheck="false"><p class="hint">Use <code>.</code> for the root module, or a path like <code>./cmd/myapp</code>.</p></div>`,
+
+  dotnet: `<div class="field"><label for="dn-proj">Project file <span style="font-weight:400;color:var(--fg2)">(optional)</span></label><input type="text" id="dn-proj" placeholder="MyApp/MyApp.csproj" spellcheck="false"><p class="hint">Leave blank to build the solution in the repo root.</p></div>
+  <div class="field"><label for="dn-fx">Self-contained</label><select id="dn-fx"><option value="yes" selected>Yes — include .NET runtime</option><option value="no">No — requires .NET installed</option></select></div>`,
+};
+
+// ── Tool selection ──
+let activeTool = 'pyinstaller';
+document.getElementById('tool-grid').addEventListener('click', e => {
+  const btn = e.target.closest('.option-btn');
+  if (!btn) return;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTool = btn.dataset.tool;
+  document.getElementById('tool-opts').innerHTML = toolOpts[activeTool] || '';
+  document.getElementById('output-section').classList.remove('visible');
+});
+// Init first tool opts
+document.getElementById('tool-opts').innerHTML = toolOpts['pyinstaller'];
+
+// ── Helpers ──
+function repoName(url) {
+  try {
+    const parts = new URL(url).pathname.replace(/\/$/, '').split('/');
+    return parts[parts.length - 1].replace(/\.git$/, '') || 'my-app';
+  } catch { return 'my-app'; }
+}
+
+function indent(text, n) {
+  return text.split('\n').map(l => ' '.repeat(n) + l).join('\n');
+}
+
+function triggerBlock(trigger, branch) {
+  const b = branch || 'main';
+  switch(trigger) {
+    case 'push':    return `on:\n  push:\n    branches: [ "${b}" ]`;
+    case 'release': return `on:\n  push:\n    tags: [ "v*" ]`;
+    case 'manual':  return `on:\n  workflow_dispatch:`;
+    case 'both':    return `on:\n  push:\n    branches: [ "${b}" ]\n  workflow_dispatch:`;
+    default:        return `on:\n  workflow_dispatch:`;
+  }
+}
+
+// ── YAML generators ──
+function genPyinstaller(name, trigger, branch) {
+  const entry = document.getElementById('py-entry')?.value.trim() || 'main.py';
+  const mode  = document.getElementById('py-mode')?.value || '--onefile';
+  return [
+    `name: Build EXE`,
+    ``,
+    triggerBlock(trigger, branch),
+    ``,
+    `jobs:`,
+    `  build:`,
+    `    runs-on: windows-latest`,
+    ``,
+    `    steps:`,
+    `      - name: Checkout`,
+    `        uses: actions/checkout@v4`,
+    ``,
+    `      - name: Set up Python`,
+    `        uses: actions/setup-python@v5`,
+    `        with:`,
+    `          python-version: "3.11"`,
+    ``,
+    `      - name: Install dependencies`,
+    `        run: |`,
+    `          python -m pip install --upgrade pip`,
+    `          pip install pyinstaller`,
+    `          if (Test-Path requirements.txt) { pip install -r requirements.txt }`,
+    `        shell: pwsh`,
+    ``,
+    `      - name: Build EXE`,
+    `        run: pyinstaller ${mode} --name "${name}" ${entry}`,
+    ``,
+    `      - name: Upload artifact`,
+    `        uses: actions/upload-artifact@v4`,
+    `        with:`,
+    `          name: ${name}-windows`,
+    `          path: dist/${mode === '--onefile' ? name + '.exe' : name + '/'}`,
+    `          if-no-files-found: error`,
+  ].join('\n');
+}
+
+function genNuitka(name, trigger, branch) {
+  const entry = document.getElementById('nu-entry')?.value.trim() || 'main.py';
+  const extra = document.getElementById('nu-extra')?.value.trim() || '';
+  return [
+    `name: Build EXE`,
+    ``,
+    triggerBlock(trigger, branch),
+    ``,
+    `jobs:`,
+    `  build:`,
+    `    runs-on: windows-latest`,
+    ``,
+    `    steps:`,
+    `      - name: Checkout`,
+    `        uses: actions/checkout@v4`,
+    ``,
+    `      - name: Set up Python`,
+    `        uses: actions/setup-python@v5`,
+    `        with:`,
+    `          python-version: "3.11"`,
+    ``,
+    `      - name: Install dependencies`,
+    `        run: |`,
+    `          python -m pip install --upgrade pip nuitka`,
+    `          if (Test-Path requirements.txt) { pip install -r requirements.txt }`,
+    `        shell: pwsh`,
+    ``,
+    `      - name: Build EXE`,
+    `        run: python -m nuitka --onefile --output-filename="${name}.exe" ${extra ? extra + ' ' : ''}${entry}`,
+    ``,
+    `      - name: Upload artifact`,
+    `        uses: actions/upload-artifact@v4`,
+    `        with:`,
+    `          name: ${name}-windows`,
+    `          path: "*.exe"`,
+    `          if-no-files-found: error`,
+  ].join('\n');
+}
+
+function genPkg(name, trigger, branch) {
+  const entry = document.getElementById('pkg-entry')?.value.trim() || 'index.js';
+  const node  = document.getElementById('pkg-node')?.value || 'node20';
+  return [
+    `name: Build EXE`,
+    ``,
+    triggerBlock(trigger, branch),
+    ``,
+    `jobs:`,
+    `  build:`,
+    `    runs-on: windows-latest`,
+    ``,
+    `    steps:`,
+    `      - name: Checkout`,
+    `        uses: actions/checkout@v4`,
+    ``,
+    `      - name: Set up Node`,
+    `        uses: actions/setup-node@v4`,
+    `        with:`,
+    `          node-version: "20"`,
+    ``,
+    `      - name: Install dependencies`,
+    `        run: npm install`,
+    ``,
+    `      - name: Install pkg`,
+    `        run: npm install -g @vercel/pkg`,
+    ``,
+    `      - name: Build EXE`,
+    `        run: pkg ${entry} --targets ${node}-win-x64 --output ${name}.exe`,
+    ``,
+    `      - name: Upload artifact`,
+    `        uses: actions/upload-artifact@v4`,
+    `        with:`,
+    `          name: ${name}-windows`,
+    `          path: "${name}.exe"`,
+    `          if-no-files-found: error`,
+  ].join('\n');
+}
+
+function genNexe(name, trigger, branch) {
+  const entry = document.getElementById('nex-entry')?.value.trim() || 'index.js';
+  const ver   = document.getElementById('nex-node')?.value.trim() || '20.11.0';
+  return [
+    `name: Build EXE`,
+    ``,
+    triggerBlock(trigger, branch),
+    ``,
+    `jobs:`,
+    `  build:`,
+    `    runs-on: windows-latest`,
+    ``,
+    `    steps:`,
+    `      - name: Checkout`,
+    `        uses: actions/checkout@v4`,
+    ``,
+    `      - name: Set up Node`,
+    `        uses: actions/setup-node@v4`,
+    `        with:`,
+    `          node-version: "20"`,
+    ``,
+    `      - name: Install dependencies`,
+    `        run: npm install`,
+    ``,
+    `      - name: Install nexe`,
+    `        run: npm install -g nexe`,
+    ``,
+    `      - name: Build EXE`,
+    `        run: nexe ${entry} --target windows-x64-${ver} --output ${name}.exe`,
+    ``,
+    `      - name: Upload artifact`,
+    `        uses: actions/upload-artifact@v4`,
+    `        with:`,
+    `          name: ${name}-windows`,
+    `          path: "${name}.exe"`,
+    `          if-no-files-found: error`,
+  ].join('\n');
+}
+
+function genGo(name, trigger, branch) {
+  const pkg = document.getElementById('go-pkg')?.value.trim() || '.';
+  return [
+    `name: Build EXE`,
+    ``,
+    triggerBlock(trigger, branch),
+    ``,
+    `env:`,
+    `  GOOS: windows`,
+    `  GOARCH: amd64`,
+    ``,
+    `jobs:`,
+    `  build:`,
+    `    runs-on: ubuntu-latest`,
+    ``,
+    `    steps:`,
+    `      - name: Checkout`,
+    `        uses: actions/checkout@v4`,
+    ``,
+    `      - name: Set up Go`,
+    `        uses: actions/setup-go@v5`,
+    `        with:`,
+    `          go-version: "1.22"`,
+    ``,
+    `      - name: Build EXE`,
+    `        run: go build -o ${name}.exe ${pkg}`,
+    ``,
+    `      - name: Upload artifact`,
+    `        uses: actions/upload-artifact@v4`,
+    `        with:`,
+    `          name: ${name}-windows`,
+    `          path: "${name}.exe"`,
+    `          if-no-files-found: error`,
+  ].join('\n');
+}
+
+function genDotnet(name, trigger, branch) {
+  const proj = document.getElementById('dn-proj')?.value.trim() || '';
+  const sc   = document.getElementById('dn-fx')?.value === 'yes';
+  const projArg = proj ? ` ${proj}` : '';
+  const scArgs  = sc ? ' --self-contained true -r win-x64' : '';
+  return [
+    `name: Build EXE`,
+    ``,
+    triggerBlock(trigger, branch),
+    ``,
+    `jobs:`,
+    `  build:`,
+    `    runs-on: windows-latest`,
+    ``,
+    `    steps:`,
+    `      - name: Checkout`,
+    `        uses: actions/checkout@v4`,
+    ``,
+    `      - name: Set up .NET`,
+    `        uses: actions/setup-dotnet@v4`,
+    `        with:`,
+    `          dotnet-version: "8.0.x"`,
+    ``,
+    `      - name: Restore`,
+    `        run: dotnet restore${projArg}`,
+    ``,
+    `      - name: Publish EXE`,
+    `        run: dotnet publish${projArg} -c Release${scArgs} -o ./output /p:AssemblyName="${name}"`,
+    ``,
+    `      - name: Upload artifact`,
+    `        uses: actions/upload-artifact@v4`,
+    `        with:`,
+    `          name: ${name}-windows`,
+    `          path: output/`,
+    `          if-no-files-found: error`,
+  ].join('\n');
+}
+
+const generators = { pyinstaller: genPyinstaller, nuitka: genNuitka, pkg: genPkg, nexe: genNexe, go: genGo, dotnet: genDotnet };
+
+// ── Simple syntax highlight ──
+function highlight(yaml) {
+  return yaml
+    .split('\n')
+    .map(line => {
+      const trimmed = line.trimStart();
+      const lead = line.slice(0, line.length - trimmed.length);
+      if (trimmed.startsWith('#')) {
+        return `<span class="y-comment">${esc(line)}</span>`;
+      }
+      // key: value
+      const kv = trimmed.match(/^([a-zA-Z_][a-zA-Z0-9_-]*)(\s*:\s*)(.*)$/);
+      if (kv) {
+        const key = `<span class="y-key">${esc(kv[1])}</span>`;
+        const val = kv[3] ? colorVal(kv[3]) : '';
+        return esc(lead) + key + esc(kv[2]) + val;
+      }
+      // list item
+      if (trimmed.startsWith('- ')) {
+        return esc(lead) + '- ' + colorVal(trimmed.slice(2));
+      }
+      return esc(line);
+    })
+    .join('\n');
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function colorVal(v) {
+  if (!v) return '';
+  if (v.startsWith('"') || v.startsWith("'")) return `<span class="y-str">${esc(v)}</span>`;
+  if (/^\d/.test(v)) return `<span class="y-num">${esc(v)}</span>`;
+  if (v === 'true' || v === 'false') return `<span class="y-num">${esc(v)}</span>`;
+  return `<span class="y-val">${esc(v)}</span>`;
+}
+
+// ── Generate ──
+document.getElementById('gen-btn').addEventListener('click', () => {
+  const rawUrl = document.getElementById('repo-url').value.trim();
+  const branch = document.getElementById('branch').value.trim() || 'main';
+  const trigger = document.getElementById('trigger').value;
+  const outRaw = document.getElementById('out-name').value.trim();
+  const name = outRaw || (rawUrl ? repoName(rawUrl) : 'my-app');
+
+  const gen = generators[activeTool];
+  if (!gen) return;
+
+  const yaml = gen(name, trigger, branch);
+  document.getElementById('yaml-output').innerHTML = highlight(yaml);
+  document.getElementById('yaml-output').dataset.raw = yaml;
+
+  // Update trigger instruction
+  const tInst = document.getElementById('trigger-inst');
+  if (trigger === 'manual' || trigger === 'both') {
+    tInst.innerHTML = `Go to <strong>Actions → Build EXE</strong> in your repo and click <strong>Run workflow</strong>.`;
+  } else if (trigger === 'push') {
+    tInst.innerHTML = `The workflow will run automatically on every push to <code>${branch}</code>.`;
+  } else {
+    tInst.innerHTML = `Push a version tag (e.g. <code>v1.0.0</code>) to trigger the build.`;
+  }
+
+  const out = document.getElementById('output-section');
+  out.classList.add('visible');
+  setTimeout(() => out.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+});
+
+// ── Copy ──
+document.getElementById('copy-btn').addEventListener('click', () => {
+  const raw = document.getElementById('yaml-output').dataset.raw || '';
+  navigator.clipboard.writeText(raw).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 7l3 3 6-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!`;
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = 'var(--success)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  }).catch(() => {
+    // Fallback: select the pre text
+    const pre = document.getElementById('yaml-output');
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(pre);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+});
+</script>
+
+</body></html>
